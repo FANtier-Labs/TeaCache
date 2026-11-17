@@ -14,12 +14,12 @@ This is a highly readable and easy-to-use implementation of TeaCache, a training
 - [x] Implement the core TeaCache algorithm.
 - [x] Support FLUX.1-dev.
 - [x] Support DrawBench generation, scoring, and report export.
-- [ ] Publish evaluation results and qualitative comparisons.
+- [x] Publish evaluation results and qualitative comparisons.
 - [ ] Support more generative models.
 
 ## 📦Installation
 
-In this project, we use [uv](https://github.com/astral-sh/uv) for package management. Python **3.12 or newer** is required. FLUX inference examples require a CUDA GPU with sufficient memory.
+In this project, we use [uv](https://github.com/astral-sh/uv) for package management.
 
 1. **Clone this repository and navigate to the TeaCache folder:**
 
@@ -105,29 +105,19 @@ bash scripts/flux/run_base.sh
 THRESHOLDS="0.25 0.4 0.6 0.8" bash scripts/flux/run_teacache.sh
 ```
 
-Both scripts accept generation options such as `--limit`, `--steps`, and `--seed`; use identical options for the baseline and candidates. The framework supports multiple GPU workers, resumable generation, paired scoring, and JSON/CSV export. See the [evaluation guide](eval/drawbench/README.md) for configuration and output details.
+The experimental results are shown as follows.
 
-Latency uses the same shared CUDA Event timing function as `playground/flux.py`, covering the pipeline call while excluding model loading, patch setup/teardown, disk saving, and scoring. Overall speedup is the sum of paired baseline inference times divided by the sum of TeaCache inference times. This measures per-sample acceleration rather than multi-GPU job throughput.
-
-> **Results placeholder:** Populate the table after completing evaluation runs. Dashes indicate results that have not been reported.
-
-| Method | Latency (s) ↓ | Speedup ↑ | CLIP similarity ↑ | PSNR (dB) ↑ | LPIPS ↓ |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| FLUX.1-dev | — | 1.00× | — | — | — |
-| TeaCache (threshold = 0.25) | — | — | — | — | — |
-| TeaCache (threshold = 0.4) | — | — | — | — | — |
-| TeaCache (threshold = 0.6) | — | — | — | — | — |
-| TeaCache (threshold = 0.8) | — | — | — | — | — |
-
-CLIP similarity measures prompt alignment using the raw cosine similarity from OpenAI CLIP ViT-B/32. PSNR and LPIPS compare candidate images against paired baseline images. Latency is averaged per image. Reports include overall, category, and per-sample results under `outputs/drawbench/flux/threshold_*/report/`.
+| Method | Latency (s) ↓ | Speedup ↑ | CLIP Score ↑ | PSNR (dB) ↑ | SSIM ↑ | LPIPS ↓ |
+| --- | ---: | ---: | ---: | ---: | ---: | ---- |
+| FLUX.1-dev | 28.81 | 1.00x | 31.624 | - | - | - |
+| TeaCache (threshold = 0.25) | 17.22 | 1.67x | 31.538 | 21.629 | 0.8372 | 0.1761 |
+| TeaCache (threshold = 0.4) | 11.80 | 2.44x | 31.675 | 18.783 | 0.7702 | 0.2661 |
+| TeaCache (threshold = 0.6) | 9.08 | 3.17x | 31.640 | 17.429 | 0.7302 | 0.3254 |
+| TeaCache (threshold = 0.8) | 7.70 | 3.74x | 31.768 | 16.514 | 0.6971 | 0.3792 |
 
 ## 🎨Visualizations
 
-> **Visualization placeholder:** Add qualitative comparisons between baseline FLUX.1-dev and TeaCache at different thresholds, using identical prompts and seeds.
-
-<!-- Add the image once available:
 ![Qualitative examples on FLUX.1-dev](assets/visualizations.png)
--->
 
 ## 👏Acknowledgement
 
