@@ -8,6 +8,7 @@ from .common import records, save, valid_seconds
 FIELDS = (
     "lpips",
     "psnr",
+    "ssim",
     "baseline_clip_score",
     "teacache_clip_score",
     "baseline_seconds",

@@ -23,6 +23,7 @@ class Metrics:
         import torch
         import clip
         from torchvision.transforms.functional import pil_to_tensor
+        from torchmetrics.functional.image import structural_similarity_index_measure
 
         if baseline.size != candidate.size:
             raise ValueError("paired image sizes differ")
@@ -36,6 +37,10 @@ class Metrics:
             row = dict(
                 psnr="inf" if psnr == float("inf") else psnr,
                 lpips=float(self.lpips(a, b, normalize=True)),
+                ssim=float(structural_similarity_index_measure(
+                    a, b, data_range=1.0, gaussian_kernel=True, sigma=1.5,
+                    kernel_size=11, k1=0.01, k2=0.03, reduction="elementwise_mean",
+                )),
             )
             text = self.clip.encode_text(
                 clip.tokenize([prompt], truncate=True).to(self.device)
@@ -95,6 +100,11 @@ def main():
         lpips_net="alex",
         lpips_version="0.1",
         psnr_data_range=1,
+        ssim=dict(
+            implementation="torchmetrics.functional.image.structural_similarity_index_measure",
+            data_range=1.0, gaussian_kernel=True, sigma=1.5, kernel_size=11,
+            k1=0.01, k2=0.03, reduction="elementwise_mean",
+        ),
         clip_definition="raw_cosine",
         text_truncate=True,
         expected=len(pairs),

@@ -29,9 +29,10 @@ CUDA_VISIBLE_DEVICES=0,1 NPROC_PER_NODE=2 THRESHOLDS="0.6" bash scripts/flux/run
 - `baseline_total_seconds` / `teacache_total_seconds`：总体或类别的样本耗时之和，不是多 GPU 作业的墙钟时长。
 - `baseline_clip_score` / `teacache_clip_score`：沿用 TaylorSeer 的 OpenAI CLIP ViT-B/32 图文原始余弦相似度；不是乘 100 或截断后的 CLIPScore 变体。长提示词截断。
 - `psnr`：RGB [0,1] 图像相对基线计算；完全相同的图像记为字符串 `"inf"`，另提供有限样本平均值和无穷值计数。
+- `ssim`：使用 TorchMetrics 计算 RGB [0,1] 图像相对基线的结构相似度，越高越接近基线，相同图像的理论值为 1（浮点计算可能有微小误差）。采用 11×11 高斯窗口、sigma=1.5、k1=0.01、k2=0.03；逐图计算后，总体和分类取算术平均值。
 - `lpips`：AlexNet v0.1 感知距离，越低越接近基线。
 
-相同硬件、驱动、负载下比较。配置记录 CUDA GPU 名称、torch/diffusers 版本及计时协议；不兼容的运行不能配对。现有参考评分模块没有 SSIM/ImageReward，此次保留其实际的 CLIP、PSNR、LPIPS 指标并新增 speedup。
+相同硬件、驱动、负载下比较。配置记录 CUDA GPU 名称、torch/diffusers 版本及计时协议；不兼容的运行不能配对。画质指标包括 CLIP、PSNR、SSIM、LPIPS。
 
 ## 文件、续跑与独立评分
 
@@ -42,7 +43,7 @@ CUDA_VISIBLE_DEVICES=0,1 NPROC_PER_NODE=2 THRESHOLDS="0.6" bash scripts/flux/run
 - `threshold_0.6/scores/`：逐样本画质、耗时与 speedup。
 - `threshold_0.6/report/`：summary.json、summary.csv（总体/分类）、samples.csv（逐图）。
 
-生成跳过已有图像和记录，配置变更需要新输出目录。评分校验样本完整性、配对种子/提示词、图像哈希及耗时；已有评分的输入变化会报错，避免使用过期 speedup。性能重新测量请用新的 OUTPUT，不要复用旧耗时。
+生成跳过已有图像和记录，配置变更需要新输出目录。评分校验样本完整性、配对种子/提示词、图像哈希及耗时；已有评分的输入变化会报错，避免使用过期 speedup。性能重新测量请用新的 OUTPUT，不要复用旧耗时。添加 SSIM 前的评分配置不兼容，请为评分指定新的 `--output` 目录；可复用已生成的基线和候选图像，无需重新生成。
 
 ```bash
 python -m eval.drawbench.score --baseline outputs/drawbench/flux/baseline \
